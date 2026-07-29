@@ -12,7 +12,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 
-from janken_interfaces.msg import Hand, Result
+from face_janken_ros2_msgs.msg import Hand, Result
 
 JP = {'gu': 'グー', 'choki': 'チョキ', 'pa': 'パー', 'none': '？'}
 # key の手が value の手に勝つ

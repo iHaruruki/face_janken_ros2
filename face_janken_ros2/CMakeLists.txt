@@ -21,7 +21,7 @@ install(
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY launch config
+install(DIRECTORY launch config models
   DESTINATION share/${PROJECT_NAME}
 )
 

@@ -21,11 +21,11 @@ import rclpy
 from rclpy.node import Node
 from std_srvs.srv import Trigger
 
-from janken_interfaces.msg import Blendshapes
+from face_janken_ros2_msgs.msg import Blendshapes
 
 JP = {'gu': 'グー ✊', 'choki': 'チョキ ✌', 'pa': 'パー 🖐'}
 DEFAULT_LABELS = ['gu', 'choki', 'pa']
-pkg_share = get_package_share_directory('janken_expression')
+pkg_share = get_package_share_directory('face_janken_ros2')
 DEFAULT_PATH = os.path.join(pkg_share, 'config', 'calibration.yaml')
 
 

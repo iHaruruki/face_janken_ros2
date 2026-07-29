@@ -21,6 +21,7 @@ import os
 import cv2
 import numpy as np
 import yaml
+from ament_index_python import get_package_share_directory
 import rclpy
 from rclpy.node import Node
 
@@ -32,7 +33,7 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 from std_srvs.srv import Trigger
 
-from face_janken_ros2.msg import Hand, Blendshapes
+from face_janken_ros2_msgs.msg import Hand, Blendshapes
 
 HANDS = ('gu', 'choki', 'pa')
 
@@ -42,7 +43,9 @@ class MediapipeFaceNode(Node):
         super().__init__('mediapipe_face_node')
 
         # --- パラメータ ---
-        self.declare_parameter('model_path', '')
+        pkg_share = get_package_share_directory('face_janken_ros2')
+        default_model = os.path.join(pkg_share, 'models', 'face_landmarker.task')
+        self.declare_parameter('model_path', default_model)
         self.declare_parameter('image_topic', '/image_raw')
         self.declare_parameter('hand_topic', '/janken/hand')
         self.declare_parameter('blendshapes_topic', '/janken/blendshapes')
