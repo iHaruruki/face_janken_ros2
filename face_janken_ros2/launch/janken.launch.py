@@ -6,17 +6,27 @@ usb_cam_node → mediapipe_face_node → janken_node をまとめて立ち上げ
     ros2 launch janken_expression janken.launch.py \\
         video_device:=/dev/video0 pixel_format:=yuyv2rgb
 """
+import glob
 import os
+import subprocess
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
-
+from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
+    share_dir = get_package_share_directory("face_janken_ros2")
+    subprocess.run(["uv", "sync", "--project", share_dir, "--no-editable"], check=True)
+    venv_site_pkgs = glob.glob(
+        os.path.join(share_dir, ".venv", "lib", "python*", "site-packages")
+    )
+    existing_pythonpath = os.environ.get("PYTHONPATH", "")
+    new_pythonpath = ":".join(venv_site_pkgs + [existing_pythonpath]).strip(":")
+
     pkg_share = get_package_share_directory('face_janken_ros2')
     default_model = os.path.join(pkg_share, 'models', 'face_landmarker.task')
     default_calib = os.path.join(pkg_share, 'config', 'calibration.yaml')
@@ -64,8 +74,8 @@ def generate_launch_description():
     )
 
     face = Node(
-        package='mediapipe_face_ros2',
-        executable='face_janken_node.py',
+        package='face_janken_ros2',
+        executable='mediapipe_face_node.py',
         name='mediapipe_face_node',
         parameters=[{
             'model_path': model_path,
