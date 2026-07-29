@@ -17,9 +17,9 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
-    pkg_share = get_package_share_directory('janken_expression')
+    pkg_share = get_package_share_directory('face_janken_ros2')
     default_model = os.path.join(pkg_share, 'models', 'face_landmarker.task')
-    default_calib = os.path.expanduser('~/.config/janken/calibration.yaml')
+    default_calib = os.path.join(pkg_share, 'config', 'calibration.yaml')
 
     video_device = LaunchConfiguration('video_device')
     pixel_format = LaunchConfiguration('pixel_format')
@@ -64,8 +64,8 @@ def generate_launch_description():
     )
 
     face = Node(
-        package='janken_expression',
-        executable='mediapipe_face_node',
+        package='mediapipe_face_ros2',
+        executable='face_janken_node.py',
         name='mediapipe_face_node',
         parameters=[{
             'model_path': model_path,
@@ -82,8 +82,8 @@ def generate_launch_description():
     )
 
     janken = Node(
-        package='janken_expression',
-        executable='janken_node',
+        package='face_janken_ros2',
+        executable='janken_node.py',
         name='janken_node',
         parameters=[{
             'hand_topic': '/janken/hand',

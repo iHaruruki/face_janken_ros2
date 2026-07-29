@@ -16,6 +16,7 @@ import os
 import time
 
 import yaml
+from ament_index_python import get_package_share_directory
 import rclpy
 from rclpy.node import Node
 from std_srvs.srv import Trigger
@@ -24,7 +25,8 @@ from janken_interfaces.msg import Blendshapes
 
 JP = {'gu': 'グー ✊', 'choki': 'チョキ ✌', 'pa': 'パー 🖐'}
 DEFAULT_LABELS = ['gu', 'choki', 'pa']
-DEFAULT_PATH = os.path.expanduser('~/.config/janken/calibration.yaml')
+pkg_share = get_package_share_directory('janken_expression')
+DEFAULT_PATH = os.path.join(pkg_share, 'config', 'calibration.yaml')
 
 
 class CalibrationNode(Node):

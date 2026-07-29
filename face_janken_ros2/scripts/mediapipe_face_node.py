@@ -32,7 +32,7 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 from std_srvs.srv import Trigger
 
-from janken_interfaces.msg import Hand, Blendshapes
+from face_janken_ros2.msg import Hand, Blendshapes
 
 HANDS = ('gu', 'choki', 'pa')
 
