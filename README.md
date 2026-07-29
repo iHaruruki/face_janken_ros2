@@ -12,17 +12,41 @@ sudo apt install ros-jazzy-usb-cam ros-jazzy-cv-bridge
 ```
 
 ## How to use
+### Play
 Run camera
 ```bash
 ros2 run usb_cam usb_cam_node_exe
+```
+Run `mediapipe_face_node`
+```bash
+cd ~/ros2_ws/src/face_janken_ros2/face_janken_ros2/
+source .venv/bin/activate
+ros2 run face_janken_ros2 mediapipe_face_node.py
 ```
 Run `janken_node`
 ```bash
 cd ~/ros2_ws/src/face_janken_ros2/face_janken_ros2/
 source .venv/bin/activate
-
+ros2 run face_janken_ros2 janken_node.py
 ```
 
+## calibration
+Run camera
+```bash
+ros2 run usb_cam usb_cam_node_exe
+```
+Run `mediapipe_face_node`
+```bash
+cd ~/ros2_ws/src/face_janken_ros2/face_janken_ros2/
+source .venv/bin/activate
+ros2 run face_janken_ros2 mediapipe_face_node.py
+```
+Run `calibration_node`
+```bash
+cd ~/ros2_ws/src/face_janken_ros2/face_janken_ros2/
+source .venv/bin/activate
+ros2 run face_janken_ros2 calibration_node.py
+```
 
 ## Topics
 
