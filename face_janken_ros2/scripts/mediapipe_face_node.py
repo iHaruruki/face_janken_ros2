@@ -17,6 +17,7 @@
 校正ファイルを更新したら ~/reload_calibration サービスで再読み込みできる。
 """
 import os
+from unittest import result
 
 import cv2
 import numpy as np
@@ -28,6 +29,10 @@ from rclpy.node import Node
 import mediapipe as mp
 from mediapipe.tasks import python as mp_python
 from mediapipe.tasks.python import vision as mp_vision
+from mediapipe.python.solutions import drawing_utils as mp_drawing
+from mediapipe.python.solutions import drawing_styles as mp_drawing_styles
+from mediapipe.python.solutions import face_mesh as mp_face_mesh
+from mediapipe.framework.formats import landmark_pb2
 
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
@@ -55,6 +60,7 @@ class MediapipeFaceNode(Node):
         self.declare_parameter('smile_threshold', 0.4)
         self.declare_parameter('publish_debug_image', True)
         self.declare_parameter('debug_image_topic', '/janken/debug_image')
+        self.declare_parameter('draw_face_mesh', True)
 
         model_path = self.get_parameter('model_path').value
         image_topic = self.get_parameter('image_topic').value
@@ -67,6 +73,7 @@ class MediapipeFaceNode(Node):
         self.smile_th = float(self.get_parameter('smile_threshold').value)
         self.publish_debug = bool(self.get_parameter('publish_debug_image').value)
         debug_topic = self.get_parameter('debug_image_topic').value
+        self.draw_face_mesh = bool(self.get_parameter('draw_face_mesh').value)
 
         if not model_path or not os.path.isfile(model_path):
             self.get_logger().error(
@@ -190,7 +197,7 @@ class MediapipeFaceNode(Node):
             self._last_hand = hand
 
         if self.debug_pub is not None:
-            self._publish_debug(rgb, msg.header, hand, conf, scores)
+            self._publish_debug(rgb, msg.header, hand, conf, scores, result)
 
     @staticmethod
     def _blendshape_dict(result):
@@ -241,19 +248,52 @@ class MediapipeFaceNode(Node):
     # ------------------------------------------------------------------
     # デバッグ描画
     # ------------------------------------------------------------------
-    def _publish_debug(self, rgb, header, hand, conf, scores):
+    # replace function signature + body
+    def _publish_debug(self, rgb, header, hand, conf, scores, result):
         bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+
+        # Face Mesh overlay (tesselation + contours + irises)
+        if self.draw_face_mesh and result and result.face_landmarks:
+            for face_landmarks in result.face_landmarks:
+                lm_list = landmark_pb2.NormalizedLandmarkList()
+                lm_list.landmark.extend([
+                    landmark_pb2.NormalizedLandmark(x=lm.x, y=lm.y, z=lm.z)
+                    for lm in face_landmarks
+                ])
+
+                mp_drawing.draw_landmarks(
+                    image=bgr,
+                    landmark_list=lm_list,
+                    connections=mp_face_mesh.FACEMESH_TESSELATION,
+                    landmark_drawing_spec=None,
+                    connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_tesselation_style(),
+                )
+                mp_drawing.draw_landmarks(
+                    image=bgr,
+                    landmark_list=lm_list,
+                    connections=mp_face_mesh.FACEMESH_CONTOURS,
+                    landmark_drawing_spec=None,
+                    connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_contours_style(),
+                )
+                mp_drawing.draw_landmarks(
+                    image=bgr,
+                    landmark_list=lm_list,
+                    connections=mp_face_mesh.FACEMESH_IRISES,
+                    landmark_drawing_spec=None,
+                    connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_iris_connections_style(),
+                )
+
         mode = 'CALIB' if self._calib else 'RULE'
-        label = {'gu': 'GU', 'choki': 'CHOKI',
-                 'pa': 'PA', 'none': 'NONE'}.get(hand, hand)
+        label = {'gu': 'GU', 'choki': 'CHOKI', 'pa': 'PA', 'none': 'NONE'}.get(hand, hand)
         cv2.putText(bgr, f'[{mode}] {label} ({conf:.2f})', (10, 40),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv2.LINE_AA)
+
         y = 78
         for key in ('jawOpen', 'mouthSmileLeft', 'mouthSmileRight'):
             cv2.putText(bgr, f'{key}: {scores.get(key, 0.0):.2f}', (10, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 0), 1,
-                        cv2.LINE_AA)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 0), 1, cv2.LINE_AA)
             y += 22
+
         debug_msg = self.bridge.cv2_to_imgmsg(bgr, encoding='bgr8')
         debug_msg.header = header
         self.debug_pub.publish(debug_msg)
