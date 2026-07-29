@@ -15,8 +15,19 @@ ament_python_install_package(${PROJECT_NAME} PACKAGE_DIR src/${PROJECT_NAME})
 
 # Install Python executables
 install(
-  PROGRAMS scripts/publisher.py
+  PROGRAMS scripts/calibration_node.py
+  PROGRAMS scripts/janken_node.py
+  PROGRAMS scripts/mediapipe_face_node.py
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(FILES
+  ../pyproject.toml
+  DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
