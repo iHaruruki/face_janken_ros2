@@ -2,12 +2,17 @@
 name = "face-janken-ros2"
 version = "0.1.0"
 description = "Add your description here"
-readme = "README.md"
 authors = [
     { name = "Haruki Isono", email = "haruki.isono861@gmail.com" }
 ]
-requires-python = ">=3.10"
-dependencies = []
+requires-python = ">=3.12"
+dependencies = [
+    "mediapipe==0.10.14",
+    "opencv-contrib-python==4.10.0.84",
+    "protobuf==4.25.5",
+    "pyyaml>=6.0.3",
+    "numpy==1.26.4",
+]
 
 [build-system]
 requires = ["uv_build>=0.11.24,<0.12.0"]
